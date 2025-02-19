@@ -1,0 +1,312 @@
+app:
+  description: A tool to query elastic for use with an agent
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: elastic-retrieval-tool
+  use_icon_as_answer_icon: false
+kind: app
+version: 0.1.5
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: false
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        sourceType: start
+        targetType: code
+      id: 1729516507507-source-1729516559571-target
+      source: '1729516507507'
+      sourceHandle: source
+      target: '1729516559571'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: code
+        targetType: http-request
+      id: 1729516559571-source-1729516664249-target
+      source: '1729516559571'
+      sourceHandle: source
+      target: '1729516664249'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: http-request
+        targetType: code
+      id: 1729516664249-source-1729516912677-target
+      source: '1729516664249'
+      sourceHandle: source
+      target: '1729516912677'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: code
+        targetType: end
+      id: 1729516912677-source-1729517424253-target
+      source: '1729516912677'
+      sourceHandle: source
+      target: '1729517424253'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: Start
+        type: start
+        variables:
+        - label: input_query
+          max_length: 500
+          options: []
+          required: true
+          type: paragraph
+          variable: input_query
+      height: 90
+      id: '1729516507507'
+      position:
+        x: 81.48864525516655
+        y: 282
+      positionAbsolute:
+        x: 81.48864525516655
+        y: 282
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "\ndef main() -> dict:\n\n    proxy_base = \"http://host.docker.internal:3004\"\
+          \n    index_name = \"cap-gen-ai\"\n    elser_inference_id = \"elser-endpoint\"\
+          \n    e5_inference_id = \"e5-endpoint\"\n    # ref_type = \"programmatic\"\
+          \n    ref_type = \"inferred\"\n\n    return {\n        \"search_url\": f\"\
+          {proxy_base}/api/{index_name}/_search\",\n        \"ref_type\": ref_type,\n\
+          \        \"docs_per_context\": 3,\n        \"elser_inference_id\": elser_inference_id,\n\
+          \        \"e5_inference_id\": e5_inference_id,\n    }\n"
+        code_language: python3
+        desc: ''
+        outputs:
+          docs_per_context:
+            children: null
+            type: number
+          e5_inference_id:
+            children: null
+            type: string
+          elser_inference_id:
+            children: null
+            type: string
+          ref_type:
+            children: null
+            type: string
+          search_url:
+            children: null
+            type: string
+        selected: false
+        title: Set Config Params
+        type: code
+        variables: []
+      height: 54
+      id: '1729516559571'
+      position:
+        x: 384
+        y: 282
+      positionAbsolute:
+        x: 384
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - type: text
+            value: "{\n    \"_source\": {\n        \"excludes\": [\n            \"\
+              title_embedding\",\n            \"body_chunks\"\n        ]\n    },\n\
+              \    \"retriever\": {\n        \"rrf\": {\n            \"retrievers\"\
+              : [\n                {\n                    \"standard\": {\n      \
+              \                  \"query\": {\n                            \"multi_match\"\
+              : {\n                                \"query\": \"{{#1729516507507.input_query#}}\"\
+              ,\n                                \"fields\": [\n                 \
+              \                   \"title^10\",\n                                \
+              \    \"body\",\n                                    \"meta_description^3\"\
+              \n                                ],\n                             \
+              \   \"boost\": 1.5\n                            }\n                \
+              \        }\n                    }\n                },\n            \
+              \    {\n                    \"standard\": {\n                      \
+              \  \"query\": {\n                            \"nested\": {\n       \
+              \                         \"path\": \"body_chunks\",\n             \
+              \                   \"query\": {\n                                 \
+              \   \"sparse_vector\": {\n                                        \"\
+              field\": \"body_chunks.chunk_elser.predicted_value\",\n            \
+              \                            \"inference_id\": \"{{#1729516559571.elser_inference_id#}}\"\
+              ,\n                                        \"query\": \"{{#1729516507507.input_query#}}\"\
+              ,\n                                        \"boost\": 3\n          \
+              \                          }\n                                }\n  \
+              \                          }\n                        }\n          \
+              \          }\n                },\n                {\n              \
+              \      \"knn\": {\n                        \"field\": \"title_embedding.predicted_value\"\
+              ,\n                        \"query_vector_builder\": {\n           \
+              \                 \"text_embedding\": {\n                          \
+              \      \"model_id\": \"{{#1729516559571.e5_inference_id#}}\",\n    \
+              \                            \"model_text\": \"query: {{#1729516507507.input_query#}}\"\
+              \n                            }\n                        },\n      \
+              \                  \"k\": 10,\n                        \"num_candidates\"\
+              : 100\n                    }\n                }\n            ],\n  \
+              \          \"rank_window_size\": 100,\n            \"rank_constant\"\
+              : 10\n        }\n    },\n    \"size\": 3\n}"
+          type: json
+        desc: ''
+        headers: ''
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: Query Elasticsearch
+        type: http-request
+        url: '{{#1729516559571.search_url#}}'
+        variables: []
+      height: 122
+      id: '1729516664249'
+      position:
+        x: 688
+        y: 282
+      positionAbsolute:
+        x: 688
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "def main(elastic_response_str: str) -> dict:\n\n    import json\n \
+          \   \n    elastic_response_obj = json.loads(elastic_response_str)\n    result\
+          \ = elastic_response_obj.get(\"hits\", {})\n    ai_context = \"\"\n    if\
+          \ result and len(result) > 0:\n        doc_results = result.get(\"hits\"\
+          , [])\n        if len(doc_results) > 0:\n            ai_context = \"####\
+          \ DOCUMENTS\\n\\n\"\n            for i, doc in enumerate(doc_results):\n\
+          \                source = doc.get(\"_source\", {})\n                title\
+          \ = source.get(\"title\", \"No Title\")\n                url = source.get(\"\
+          url\", \"No URL\")\n                body = source.get(\"body\", \"No Content\"\
+          )\n                ai_context += (\n                    f\"---\\n\"\n  \
+          \                  f\"[Document {i+1}]\\n\"\n                    f\"Title:\
+          \ {title}\\n\"\n                    f\"URL: {url}\\n\"\n               \
+          \     f\"Content: {body}\\n\"\n                    f\"---\\n\"\n       \
+          \         )\n            ai_context = ai_context.strip()\n    return  {\n\
+          \        \"ai_context\": ai_context,\n    }"
+        code_language: python3
+        desc: ''
+        outputs:
+          ai_context:
+            children: null
+            type: string
+        selected: false
+        title: Parse Results
+        type: code
+        variables:
+        - value_selector:
+          - '1729516664249'
+          - body
+          variable: elastic_response_str
+      height: 54
+      id: '1729516912677'
+      position:
+        x: 992
+        y: 282
+      positionAbsolute:
+        x: 992
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - '1729516912677'
+          - ai_context
+          variable: result
+        selected: false
+        title: End
+        type: end
+      height: 90
+      id: '1729517424253'
+      position:
+        x: 1296
+        y: 282
+      positionAbsolute:
+        x: 1296
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    viewport:
+      x: 196.54038702321878
+      y: 179.29574811186723
+      zoom: 0.6717517128606486
