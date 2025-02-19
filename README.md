@@ -66,13 +66,13 @@ curl -fsSL https://ollama.com/install.sh | sh
 
 ## Appendix / Additional Reading
 
-* Ollama Models
+* [Ollama Models](https://ollama.com/search)
   
-* Dify Project
+* [Dify Project](https://github.com/langgenius/dify)
 
-* Elastic Search Labs
+* [Elastic Search Labs](https://www.elastic.co/search-labs)
 
 
 ## 🚀 About Me
-I am a Strategic Operator who bridges executive leadership with mission-driven execution, specializing in AI, enterprise search, and digital transformation. With deep expertise in professional services, technology strategy, and product innovation, I empower organizations to leverage AI for measurable business impact.
+I am a strategic operator who bridges executive leadership with mission-driven execution, specializing in AI, enterprise search, and digital transformation. With deep expertise in professional services, technology strategy, and product innovation, I empower organizations to leverage AI for measurable business impact.
 
